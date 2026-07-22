@@ -7,6 +7,7 @@
 const hidratacao = {
     metaDiaria: 2000,
     consumos: [],
+    modalExibido: false,
 
     elementos: {},
 
@@ -30,6 +31,12 @@ const hidratacao = {
 
         this.elementos.historico =
             document.getElementById("historico");
+
+        this.elementos.modal =
+            document.getElementById("modal");
+
+        this.elementos.fecharModal =
+            document.getElementById("fecharModal");
     },
 
     registrarEventos() {
@@ -50,6 +57,12 @@ const hidratacao = {
             } else {
                 alert("Digite uma quantidade válida.");
             }
+        });
+
+        this.elementos.fecharModal.addEventListener("click", () => {
+
+            this.fecharModal();
+
         });
     },
 
@@ -95,10 +108,20 @@ const hidratacao = {
             this.elementos.statusMeta.textContent = "✅ Meta atingida";
             this.elementos.faltam.textContent =
                 "Parabéns! Continue se hidratando.";
+
+            if (!this.modalExibido) {
+
+                this.abrirModal();
+
+                this.modalExibido = true;
+
+            }
         } else {
             this.elementos.statusMeta.textContent = "❌ Ainda não";
             this.elementos.faltam.textContent =
                 `Faltam ${this.metaDiaria - totalConsumido} ml`;
+
+            this.modalExibido = false;
         }
 
         this.renderizarHistorico();
@@ -128,7 +151,19 @@ const hidratacao = {
 
         });
 
+    },
+
+    abrirModal() {
+
+        this.elementos.modal.style.display = "flex";
+
+    },
+
+    fecharModal() {
+
+        this.elementos.modal.style.display = "none";
+
     }
 };
 
-hidratacao.iniciar();
+hidratacao.iniciar();git 
