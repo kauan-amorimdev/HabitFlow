@@ -6,7 +6,7 @@
 
 const hidratacao = {
     metaDiaria: 2000,
-    consumoAtual: 0,
+    consumos: [],
 
     elementos: {},
 
@@ -27,6 +27,9 @@ const hidratacao = {
         this.elementos.btn500 = document.getElementById("btn500");
         this.elementos.btnAdicionar = document.getElementById("btnAdicionar");
         this.elementos.input = document.getElementById("aguaPersonalizada");
+
+        this.elementos.historico =
+            document.getElementById("historico");
     },
 
     registrarEventos() {
@@ -51,16 +54,36 @@ const hidratacao = {
     },
 
     adicionarAgua(quantidade) {
-        this.consumoAtual += quantidade;
+
+        const agora = new Date();
+
+        this.consumos.push({
+
+            horario: agora.toLocaleTimeString("pt-BR", {
+                hour: "2-digit",
+                minute: "2-digit"
+            }),
+
+            quantidade: quantidade
+
+        });
+
         this.atualizarTela();
     },
 
     atualizarTela() {
+
+        const totalConsumido = this.consumos.reduce((total, consumo) => {
+
+            return total + consumo.quantidade;
+
+        }, 0);
+
         this.elementos.consumo.textContent =
-            `${this.consumoAtual} ml / ${this.metaDiaria} ml`;
+            `${totalConsumido} ml / ${this.metaDiaria} ml`;
 
         const percentual = Math.min(
-            (this.consumoAtual / this.metaDiaria) * 100,
+            (totalConsumido / this.metaDiaria) * 100,
             100
         );
 
@@ -68,15 +91,43 @@ const hidratacao = {
         this.elementos.porcentagem.textContent =
             `${Math.round(percentual)}%`;
 
-        if (this.consumoAtual >= this.metaDiaria) {
+        if (totalConsumido >= this.metaDiaria) {
             this.elementos.statusMeta.textContent = "✅ Meta atingida";
             this.elementos.faltam.textContent =
                 "Parabéns! Continue se hidratando.";
         } else {
             this.elementos.statusMeta.textContent = "❌ Ainda não";
             this.elementos.faltam.textContent =
-                `Faltam ${this.metaDiaria - this.consumoAtual} ml`;
+                `Faltam ${this.metaDiaria - totalConsumido} ml`;
         }
+
+        this.renderizarHistorico();
+    },
+
+    renderizarHistorico() {
+
+        this.elementos.historico.innerHTML = "";
+
+        if (this.consumos.length === 0) {
+
+            this.elementos.historico.innerHTML =
+
+                '<p class="vazio">Nenhum consumo registrado.</p>';
+
+            return;
+        }
+
+        this.consumos.forEach((consumo) => {
+
+            const item = document.createElement("p");
+
+            item.textContent =
+                `${consumo.horario} - +${consumo.quantidade} ml`;
+
+            this.elementos.historico.appendChild(item);
+
+        });
+
     }
 };
 
