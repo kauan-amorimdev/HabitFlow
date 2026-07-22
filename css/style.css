@@ -245,3 +245,20 @@ h2 {
 .empty-content strong {
   color: #6b46c1;
 }
+.hero-bg {
+  position: absolute;
+  top: 0; 
+  left: 0;
+  width: 100%;
+  height: 600px;
+  
+  background-image: 
+    linear-gradient(to bottom, 
+      rgba(244, 247, 249, 0.95) 0%, 
+      rgba(244, 247, 249, 0.6) 40%, 
+      rgba(244, 247, 249, 1) 100%), 
+    url('https://plus.unsplash.com/premium_photo-1661953124438-3959644bbcb4?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fGV1cm9wYSUyMG5hdHVyZXphfGVufDB8fDB8fHww');
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
