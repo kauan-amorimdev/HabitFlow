@@ -12,9 +12,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (!formCadastro) return;
 
+  // Define a data atual como padrão no campo de data
+  const hoje = new Date().toISOString().split('T')[0];
+  if (campoData) campoData.value = hoje;
+
+  // Guarda a referência do timer da mensagem para evitar conflito
+  let tempoFeedback = null;
+
   // Evento ao enviar o formulário
   formCadastro.addEventListener('submit', (event) => {
-    // Evita o recarregamento da página (Prevenção Padrão)
+    // Evita o recarregamento da página
     event.preventDefault();
 
     // Captura dos valores
@@ -54,19 +61,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Feedback de sucesso
     exibirFeedback('Registro cadastrado com sucesso!', 'sucesso');
 
-    // Reseta o formulário
+    // Reseta o formulário e restaura a data de hoje
     formCadastro.reset();
+    campoData.value = hoje;
   });
 
   /**
-   * Exibe mensagens de alerta na tela
+   * Exibe mensagens de alerta na tela com controle de temporizador
    */
   function exibirFeedback(texto, tipo) {
+    if (tempoFeedback) clearTimeout(tempoFeedback);
+
     msgFeedback.textContent = texto;
     msgFeedback.className = `feedback-msg ${tipo}`;
 
-    // Remove a mensagem após 4 segundos
-    setTimeout(() => {
+    tempoFeedback = setTimeout(() => {
       msgFeedback.className = 'feedback-msg hidden';
     }, 4000);
   }
