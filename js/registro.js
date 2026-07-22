@@ -211,7 +211,10 @@ function salvarEdicao(evento) {
     mostrarFeedback('A água consumida deve ser 0 ou mais.', 'erro');
     return;
   }
-
+  if (agua > 10000) {
+    mostrarFeedback('Valor de água inválido. Máximo permitido: 10.000ml.', 'erro');
+    return;
+  }
   registros = registros.map(function (reg) {
     if (reg.id === id) {
       return {
