@@ -1,0 +1,110 @@
+/* ==========================================
+   MÓDULO DE HIDRATAÇÃO
+   Responsável: Bruno Jallon
+   Branch: feature/hidratacao
+========================================== */
+
+.meta{
+    margin:2rem 0;
+}
+
+.meta h3{
+    margin-bottom:.5rem;
+}
+
+.meta h1{
+    color:#6b46c1;
+}
+
+.barra{
+    width:100%;
+    height:24px;
+    background:#e2e8f0;
+    border-radius:999px;
+    overflow:hidden;
+    margin:1rem 0;
+}
+
+.progresso{
+    width:0%;
+    height:100%;
+    background:#6b46c1;
+    transition:.3s;
+}
+
+#porcentagem{
+    text-align:right;
+    color:#718096;
+    font-weight:600;
+}
+
+hr{
+    margin:2rem 0;
+    border:none;
+    border-top:1px solid #e2e8f0;
+}
+
+.botoes{
+    display:flex;
+    gap:1rem;
+    margin-top:1rem;
+}
+
+.botoes .btn-primary{
+    flex:1;
+}
+
+.personalizado{
+    margin-top:2rem;
+}
+
+.status{
+    text-align:center;
+}
+
+#statusMeta{
+    margin-top:1rem;
+    font-size:1.2rem;
+    font-weight:bold;
+}
+
+#faltam{
+    color:#718096;
+    margin-top:.5rem;
+}
+
+#historico{
+    margin-top:1rem;
+}
+
+.vazio{
+    color:#718096;
+    text-align:center;
+}
+
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:none;
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-conteudo{
+    background:#fff;
+    width:380px;
+    padding:2rem;
+    border-radius:12px;
+    text-align:center;
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+}
+
+.modal-conteudo h2{
+    color:#6b46c1;
+    margin-bottom:1rem;
+}
+
+.modal-conteudo .btn-primary{
+    margin-top:1.5rem;
+}
