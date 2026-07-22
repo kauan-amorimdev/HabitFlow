@@ -13,6 +13,7 @@ const hidratacao = {
 
     iniciar() {
         this.carregarElementos();
+        this.carregarDados();
         this.registrarEventos();
         this.atualizarTela();
     },
@@ -80,6 +81,8 @@ const hidratacao = {
             quantidade: quantidade
 
         });
+
+        this.salvarDados();
 
         this.atualizarTela();
     },
@@ -163,7 +166,29 @@ const hidratacao = {
 
         this.elementos.modal.style.display = "none";
 
+    },
+
+    salvarDados() {
+
+        localStorage.setItem(
+            "consumosHabitFlow",
+            JSON.stringify(this.consumos)
+        );
+
+    },
+
+    carregarDados() {
+
+        const dados =
+            localStorage.getItem("consumosHabitFlow");
+
+        if (dados) {
+
+            this.consumos = JSON.parse(dados);
+
+        }
+
     }
 };
 
-hidratacao.iniciar();git 
+hidratacao.iniciar();
