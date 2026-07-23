@@ -37,6 +37,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const exercicioVal = campoExercicio ? campoExercicio.checked : false;
     const notasVal = campoNotas ? campoNotas.value.trim() : '';
 
+    // Define o limite máximo de água permitido por registro (10.000 ml = 10 litros)
+    const LIMITE_MAXIMO_AGUA = 10000;
+
     // Validações dos campos
     if (!dataVal) {
       exibirFeedback('Por favor, informe a data do registro.', 'erro');
@@ -45,6 +48,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (isNaN(aguaVal) || aguaVal < 0) {
       exibirFeedback('A quantidade de água não pode ser negativa.', 'erro');
+      return;
+    }
+
+    if (aguaVal > LIMITE_MAXIMO_AGUA) {
+      exibirFeedback('Informe um valor de água de no máximo 10.000 ml.', 'erro');
       return;
     }
 
