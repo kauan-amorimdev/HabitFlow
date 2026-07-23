@@ -258,6 +258,28 @@ const hidratacao = {
             "consumosHabitFlow",
             JSON.stringify(this.consumos)
         );
+        const totalConsumido = this.consumos.reduce((total, c) => total + c.quantidade, 0);
+        const hojeIso = new Date().toISOString().split('T')[0];
+        let registrosGerais = [];
+        const salvos = localStorage.getItem('habitflow_dados');
+        if (salvos) {
+            registrosGerais = JSON.parse(salvos);
+        } else if (typeof dadosIniciais !== 'undefined') {
+            registrosGerais = [...dadosIniciais];
+        }
+        const indexHoje = registrosGerais.findIndex(r => r.data === hojeIso);
+        if (indexHoje !== -1) {
+            registrosGerais[indexHoje].aguaConsumidaMl = totalConsumido;
+        } else {
+            registrosGerais.push({
+                id: Date.now(),
+                data: hojeIso,
+                aguaConsumidaMl: totalConsumido,
+                exercicioFeito: false,
+                notas: 'Registro automático de água'
+            });
+        }
+        localStorage.setItem('habitflow_dados', JSON.stringify(registrosGerais));
     },
 
     carregarDados() {
