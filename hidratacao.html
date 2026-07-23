@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitFlow | Hidratação</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/hidratacao.css">
+</head>
+
+<body>
+
+    <!-- Menu Padrão do Grupo -->
+    <nav class="navbar">
+        <h1>HabitFlow</h1>
+
+        <ul class="nav-links">
+            <li><a href="index.html">Dashboard / Cadastro</a></li>
+            <li><a href="registro.html">Registro</a></li>
+            <li><a href="hidratacao.html" class="active">Hidratação</a></li>
+            <li><a href="historico.html">Histórico</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+
+        <section class="card-section">
+
+            <h2>💧 Hidratação</h2>
+
+            <p class="subtitle">
+                Acompanhe sua hidratação diária e alcance sua meta de consumo de água.
+            </p>
+
+            <!-- Meta diária -->
+            <div class="meta">
+                <h3>Meta diária</h3>
+
+                <h1 id="consumo">
+                    0 ml / 2000 ml
+                </h1>
+
+                <div class="barra">
+                    <div id="barra-progresso" class="progresso"></div>
+                </div>
+
+                <p id="porcentagem">
+                    0%
+                </p>
+            </div>
+
+            <hr>
+
+            <!-- Botões rápidos -->
+            <h3>Adicionar água</h3>
+
+            <div class="botoes">
+                <button id="btn250" class="btn-primary">
+                    +250 ml
+                </button>
+
+                <button id="btn500" class="btn-primary">
+                    +500 ml
+                </button>
+            </div>
+
+            <!-- Quantidade personalizada -->
+            <div class="personalizado">
+
+                <div class="form-group">
+                    <label for="aguaPersonalizada">
+                        Quantidade personalizada
+                    </label>
+
+                    <input type="number" id="aguaPersonalizada" placeholder="Ex: 350" min="1">
+                </div>
+
+                <button id="btnAdicionar" class="btn-primary">
+                    Adicionar
+                </button>
+
+            </div>
+
+            <hr>
+
+            <!-- Status da meta -->
+            <div class="status">
+
+                <h3>Meta atingida?</h3>
+
+                <p id="statusMeta">
+                    ❌ Ainda não
+                </p>
+
+                <p id="faltam">
+                    Faltam 2000 ml
+                </p>
+
+            </div>
+
+            <hr>
+
+            <!-- Histórico -->
+            <div class="historico">
+
+                <h3>Histórico de hoje</h3>
+
+                <div id="historico">
+                    <p class="vazio">
+                        Nenhum consumo registrado.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+
+        <div class="modal-conteudo">
+
+            <h2>🎉 Parabéns!</h2>
+
+            <p>
+                Você atingiu sua meta diária de hidratação.
+            </p>
+
+            <button id="fecharModal" class="btn-primary">
+                Fechar
+            </button>
+
+        </div>
+
+    </div>
+
+    <script src="js/dados.js"></script>
+    <script src="js/armazenamento.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+
+</html>
