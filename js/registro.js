@@ -15,19 +15,19 @@ const editarAguaEl      = document.getElementById('editar-agua');
 const editarExercicioEl = document.getElementById('editar-exercicio');
 const editarNotasEl     = document.getElementById('editar-notas');
 function obterRegistros() {
-  if (typeof carregarDados === 'function') {
-    return carregarDados();
+  if (typeof obterRegistros !== 'undefined' && typeof salvarRegistros === 'function') {
+    return JSON.parse(localStorage.getItem('diario_habitos_dados')) || dadosIniciais;
   }
-  const salvos = localStorage.getItem('habitflow_dados');
+  const salvos = localStorage.getItem('diario_habitos_dados');
   if (salvos) return JSON.parse(salvos);
   return (typeof dadosIniciais !== 'undefined') ? [...dadosIniciais] : [];
 }
 
 function persistir() {
-  if (typeof salvarDados === 'function') {
-    salvarDados(registros);
+  if (typeof salvarRegistros === 'function') {
+    salvarRegistros(registros);
   } else {
-    localStorage.setItem('habitflow_dados', JSON.stringify(registros));
+    localStorage.setItem('diario_habitos_dados', JSON.stringify(registros));
   }
 }
 function mostrarFeedback(texto, tipo) {

@@ -125,6 +125,11 @@
   justify-content: center;
   padding: 1rem;
   z-index: 1000;
+  
+}
+
+.modal-overlay.hidden {
+  display: none;
 }
 
 .modal-conteudo {
