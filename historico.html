@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HabitFlow - Histórico e Ofensiva</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="brand">
+      <h1>HabitFlow</h1>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="index.html">Dashboard / Cadastro</a></li>
+      <li><a href="registro.html">Registro</a></li>
+      <li><a href="hidratacao.html">Hidratação</a></li>
+      <li><a href="historico.html" class="active">Histórico</a></li>
+    </ul>
+  </nav>
+  <div class="hero-bg"></div>
+  
+  <main class="container container-wide">
+    
+    <!--(Streak + Metas) -->
+    <section class="dashboard-grid">
+      <div class="stat-card streak-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-info">
+          <span class="stat-value" id="streak-count">0</span>
+          <span class="stat-label">Dias de Ofensiva</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-info">
+          <span class="stat-value" id="metas-atingidas-count">0</span>
+          <span class="stat-label">Metas Batinas</span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-info">
+          <span class="stat-value" id="total-dias-count">0</span>
+          <span class="stat-label">Dias Registrados</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section accent-card">
+      <div class="section-header">
+        <h2>Histórico e Progresso</h2>
+        <p class="subtitle">Acompanhe os seus registros diários e veja os dias em que cumpriu todas as metas.</p>
+      </div>
+
+      <ul id="lista-historico" class="historico-list">
+        
+      </ul>
+    </section>
+
+  </main>
+
+  
+  <script src="js/dados.js"></script>
+  <script src="js/armazenamento.js"></script>
+  <script src="js/historico.js"></script>
+</body>
+</html>

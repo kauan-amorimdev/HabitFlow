@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HabitFlow - Registros</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/registro.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <h1>HabitFlow</h1>
+    <ul class="nav-links">
+      <li><a href="index.html">Dashboard / Cadastro</a></li>
+      <li><a href="registro.html" class="active">Registro</a></li>
+      <li><a href="hidratacao.html">Hidratação</a></li>
+      <li><a href="historico.html">Histórico</a></li>
+    </ul>
+  </nav>
+
+  <main class="container">
+    <section class="card-section">
+      <h2>Meus Registros</h2>
+      <p class="subtitle">Veja, pesquise, edite ou remova os seus hábitos registrados.</p>
+
+      <div id="mensagem-feedback" class="feedback-msg hidden"></div>
+
+      <div class="filtros">
+        <input type="text" id="campo-busca" placeholder="Pesquisar por notas ou data...">
+        <select id="filtro-tipo">
+          <option value="todos">Todos os registros</option>
+          <option value="com-exercicio">Com exercício</option>
+          <option value="sem-exercicio">Sem exercício</option>
+          <option value="meta-agua">Meta de água atingida (2L+)</option>
+        </select>
+      </div>
+
+      <p id="contador-registros" class="contador"></p>
+
+      <div id="lista-registros" class="lista-registros"></div>
+    </section>
+  </main>
+  <div id="modal-editar" class="modal-overlay hidden">
+    <div class="modal-conteudo">
+      <h3>Editar Registro</h3>
+      <form id="form-editar">
+        <input type="hidden" id="editar-id">
+        <div class="form-group">
+          <label for="editar-data">Data *</label>
+          <input type="date" id="editar-data" required>
+        </div>
+        <div class="form-group">
+          <label for="editar-agua">Água consumida (em ml) *</label>
+          <input type="number" id="editar-agua" min="0" required>
+        </div>
+        <div class="form-group checkbox-group">
+          <label for="editar-exercicio">
+            <input type="checkbox" id="editar-exercicio"> Praticou exercício?
+          </label>
+        </div>
+        <div class="form-group">
+          <label for="editar-notas">Notas do dia</label>
+          <textarea id="editar-notas" rows="3"></textarea>
+        </div>
+        <div class="modal-botoes">
+          <button type="button" id="btn-cancelar" class="btn-secundario">Cancelar</button>
+          <button type="submit" class="btn-primary">Salvar alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/dados.js"></script>
+  <script src="js/armazenamento.js"></script>
+  <script src="js/registro.js"></script>
+
+</body>
+</html>

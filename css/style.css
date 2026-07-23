@@ -1,0 +1,348 @@
+/* ====================================================
+   1. ESTILOS BASE DO PROJETO
+   ==================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f4f7f9;
+  color: #333;
+}
+
+/* Menu Navegação */
+nav.navbar {
+  background-color: #ffffff;
+  padding: 1.2rem 2rem;
+  border-bottom: 2px solid #e1e8ed;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+nav.navbar h1 {
+  font-size: 1.6rem;
+  color: #6b46c1;
+  font-weight: 700;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #4a5568;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: #6b46c1;
+  border-bottom: 2px solid #6b46c1;
+  padding-bottom: 2px;
+}
+
+/* Containers e Cards Gerais */
+.container {
+  max-width: 750px;
+  margin: 2.5rem auto;
+  padding: 0 1rem;
+}
+
+.card-section {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.accent-card {
+  border-left: 5px solid #6b46c1;
+}
+
+h2 {
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: #718096;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Formulário de Cadastro */
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+input[type="date"],
+input[type="number"],
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus, textarea:focus {
+  border-color: #6b46c1;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkbox-group input {
+  width: 1.2rem;
+  height: 1.2rem;
+  accent-color: #6b46c1;
+}
+
+/* Botão Principal */
+.btn-primary {
+  width: 100%;
+  background-color: #6b46c1;
+  color: white;
+  border: none;
+  padding: 0.85rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #553c9a;
+}
+
+/* Mensagens de Feedback */
+.feedback-msg {
+  padding: 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.feedback-msg.sucesso {
+  background-color: #c6f6d5;
+  color: #22543d;
+  border: 1px solid #9ae6b4;
+}
+
+.feedback-msg.erro {
+  background-color: #fed7d7;
+  color: #742a2a;
+  border: 1px solid #feb2b2;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ====================================================
+   2. HISTÓRICO, OFENSIVA (STREAK) E PAINEL
+   ==================================================== */
+
+.container-wide {
+  max-width: 900px;
+}
+
+/* Cards de Estatísticas (Grid Layout) */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid #e1e8ed;
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-card.streak-card {
+  border-left: 5px solid #ff6b6b;
+}
+
+.stat-icon {
+  font-size: 2.2rem;
+  background-color: #f3f0ff;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+.streak-card .stat-icon {
+  background-color: #fff5f5;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1a202c;
+  line-height: 1.1;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #718096;
+  font-weight: 600;
+  margin-top: 0.2rem;
+}
+
+/* Lista de Histórico */
+.historico-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.historico-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.2rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  transition: transform 0.15s ease;
+}
+
+.historico-item:hover {
+  transform: translateY(-2px);
+}
+
+.historico-data {
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.historico-detalhes {
+  font-size: 0.9rem;
+  color: #4a5568;
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 0.2rem;
+}
+
+.status-badge {
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.status-badge.meta-sim {
+  background-color: #c6f6d5;
+  color: #22543d;
+  border: 1px solid #9ae6b4;
+}
+
+.status-badge.meta-nao {
+  background-color: #edf2f7;
+  color: #718096;
+  border: 1px solid #cbd5e0;
+}
+
+/* Estado Vazio */
+.empty-state {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  background-color: #faf5ff;
+  border: 2px dashed #b794f4;
+  border-radius: 10px;
+}
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.empty-content h3 {
+  color: #553c9a;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.empty-content p {
+  color: #718096;
+  font-size: 0.9rem;
+  max-width: 450px;
+  line-height: 1.4;
+}
+
+.empty-content strong {
+  color: #6b46c1;
+}
+
+.hero-bg {
+  position: absolute;
+  top: 0; 
+  left: 0;
+  width: 100%;
+  height: 600px;
+  background-image: 
+    linear-gradient(to bottom, 
+      rgba(244, 247, 249, 0.95) 0%, 
+      rgba(244, 247, 249, 0.6) 40%, 
+      rgba(244, 247, 249, 1) 100%), 
+    url('https://plus.unsplash.com/premium_photo-1661953124438-3959644bbcb4?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fGV1cm9wYSUyMG5hdHVyZXphfGVufDB8fDB8fHww');
+  background-size: cover;
+  background-position: center;
+  z-index: -1;
+}
