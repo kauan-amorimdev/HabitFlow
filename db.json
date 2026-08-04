@@ -1,0 +1,18 @@
+{
+  "habitos": [
+    {
+      "id": "1",
+      "data": "2026-08-01",
+      "aguaConsumidaMl": 2000,
+      "exercicioFeito": true,
+      "notas": "Treino leve de manhã"
+    },
+    {
+      "id": "2",
+      "data": "2026-08-02",
+      "aguaConsumidaMl": 1500,
+      "exercicioFeito": false,
+      "notas": "Dia corrido no trabalho"
+    }
+  ]
+}
