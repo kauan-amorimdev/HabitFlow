@@ -182,8 +182,24 @@ const hidratacao = {
         }
     },
 
-    // Adiciona um novo consumo de água
+    // Adiciona um novo consumo de água (com trava em 2000 ml)
     adicionarAgua(quantidade) {
+        // Calcula o total que já foi consumido no dia
+        const totalAtual = this.consumos.reduce((total, c) => total + c.quantidade, 0);
+
+        // Se já atingiu a meta, impede novos adições
+        if (totalAtual >= this.metaDiaria) {
+            alert("Você já atingiu a meta diária de 2000 ml!");
+            return;
+        }
+
+        // Se a nova quantidade for ultrapassar a meta, ajusta para adicionar apenas o que falta
+        let quantidadeEfetiva = quantidade;
+        if (totalAtual + quantidade > this.metaDiaria) {
+            quantidadeEfetiva = this.metaDiaria - totalAtual;
+            alert(`Para não ultrapassar a meta, foram adicionados apenas ${quantidadeEfetiva} ml.`);
+        }
+
         const agora = new Date();
 
         this.consumos.push({
@@ -191,7 +207,7 @@ const hidratacao = {
                 hour: "2-digit",
                 minute: "2-digit"
             }),
-            quantidade: quantidade
+            quantidade: quantidadeEfetiva
         });
 
         this.salvarDados();
