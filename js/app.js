@@ -3,10 +3,11 @@
 // Responsável: Ryan Lucas
 // Branch: feature/base-cadastro
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-  // Inicializa o LocalStorage com os mock data se estiver vazio
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // Inicializa o LocalStorage / Carga inicial da API
   if (typeof obterRegistros === 'function') {
-    obterRegistros();
+    await obterRegistros();
   }
 
   // Seleção dos elementos do HTML
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const campoExercicio = document.getElementById('campo-exercicio');
   const campoNotas = document.getElementById('campo-notas');
   const msgFeedback = document.getElementById('mensagem-feedback');
+  const btnSubmit = formCadastro ? formCadastro.querySelector('button[type="submit"]') : null;
 
   if (!formCadastro) return;
 
@@ -27,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let tempoFeedback = null;
 
   // Evento ao enviar o formulário
-  formCadastro.addEventListener('submit', (event) => {
+  formCadastro.addEventListener('submit', async (event) => {
     // Evita o recarregamento da página
     event.preventDefault();
 
@@ -61,26 +63,35 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Criação do objeto
+    // Criação do objeto sem o ID fixo (deixando a API gerar a chave primária única)
     const novoRegistro = {
-      id: Date.now(),
       data: dataVal,
       aguaConsumidaMl: aguaVal,
       exercicioFeito: exercicioVal,
       notas: notasVal
     };
 
-    // Salva no localStorage
-    if (typeof adicionarRegistro === 'function') {
-      adicionarRegistro(novoRegistro);
+    try {
+      if (btnSubmit) btnSubmit.disabled = true;
+
+      // Salva via API (com fallback no LocalStorage dentro da função)
+      if (typeof adicionarRegistro === 'function') {
+        await adicionarRegistro(novoRegistro);
+      }
+
+      // Feedback de sucesso
+      exibirFeedback('Registro cadastrado com sucesso!', 'sucesso');
+
+      // Reseta o formulário e restaura a data de hoje
+      formCadastro.reset();
+      if (campoData) campoData.value = hoje;
+
+    } catch (erro) {
+      console.error('Erro ao salvar registro:', erro);
+      exibirFeedback('Erro ao salvar o registro na API.', 'erro');
+    } finally {
+      if (btnSubmit) btnSubmit.disabled = false;
     }
-
-    // Feedback de sucesso
-    exibirFeedback('Registro cadastrado com sucesso!', 'sucesso');
-
-    // Reseta o formulário e restaura a data de hoje
-    formCadastro.reset();
-    if (campoData) campoData.value = hoje;
   });
 
   /**
@@ -98,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 4000);
   }
 });
+
 
 // ==========================================
 // MÓDULO DE HIDRATAÇÃO
