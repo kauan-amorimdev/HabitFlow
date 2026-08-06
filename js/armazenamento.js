@@ -28,7 +28,7 @@ function salvarLocal(registros) {
  */
 async function obterRegistros() {
   try {
-    const resposta = await fetch(API_URL);
+    const resposta = await fetch(HABIT_API_URL);
 
     if (!resposta.ok) {
       throw new Error(`Erro ao buscar registros: ${resposta.status}`);
@@ -88,7 +88,7 @@ async function adicionarRegistro(novoRegistro) {
  */
 async function atualizarRegistro(id, registroAtualizado) {
   try {
-    const resposta = await fetch(`${API_URL}/${id}`, {
+    const resposta = await fetch(`${HABIT_API_URL}/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
@@ -123,7 +123,7 @@ async function atualizarRegistro(id, registroAtualizado) {
  */
 async function excluirRegistro(id) {
   try {
-    const resposta = await fetch(`${API_URL}/${id}`, {
+    const resposta = await fetch(`${HABIT_API_URL}/${id}`, {
       method: "DELETE"
     });
 
