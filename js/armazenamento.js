@@ -1,33 +1,104 @@
-const CHAVE_STORAGE = 'diario_habitos_dados';
+// ==========================================
+// CAMADA DE ACESSO À API REST
+// json-server
+// ==========================================
+
+const API_URL = "http://localhost:3000/habitos";
 
 /**
- * Recupera os registros salvos.
- * Se não houver nada, inicializa o LocalStorage com os dadosIniciais.
+ * GET
+ * Busca todos os registros de hábitos na API.
  */
-function obterRegistros() {
-  const dados = localStorage.getItem(CHAVE_STORAGE);
-  
-  if (!dados) {
-    salvarRegistros(dadosIniciais);
-    return dadosIniciais;
-  }
-  
-  return JSON.parse(dados);
+async function obterRegistros() {
+    try {
+        const resposta = await fetch(API_URL);
+
+        if (!resposta.ok) {
+            throw new Error(
+                `Erro ao buscar registros: ${resposta.status}`
+            );
+        }
+
+        return await resposta.json();
+    } catch (erro) {
+        console.error("Erro na requisição GET:", erro);
+        throw erro;
+    }
 }
 
 /**
- * Sobrescreve todo o array no LocalStorage.
+ * POST
+ * Adiciona um novo registro na API.
  */
-function salvarRegistros(registros) {
-  localStorage.setItem(CHAVE_STORAGE, JSON.stringify(registros));
+async function adicionarRegistro(novoRegistro) {
+    try {
+        const resposta = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(novoRegistro)
+        });
+
+        if (!resposta.ok) {
+            throw new Error(
+                `Erro ao adicionar registro: ${resposta.status}`
+            );
+        }
+
+        return await resposta.json();
+    } catch (erro) {
+        console.error("Erro na requisição POST:", erro);
+        throw erro;
+    }
 }
 
 /**
- * Adiciona um novo registro e atualiza a base no LocalStorage.
+ * PUT
+ * Atualiza completamente um registro existente.
  */
-function adicionarRegistro(novoRegistro) {
-  const registros = obterRegistros();
-  registros.push(novoRegistro);
-  salvarRegistros(registros);
-  return registros;
+async function atualizarRegistro(id, registroAtualizado) {
+    try {
+        const resposta = await fetch(`${API_URL}/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(registroAtualizado)
+        });
+
+        if (!resposta.ok) {
+            throw new Error(
+                `Erro ao atualizar registro: ${resposta.status}`
+            );
+        }
+
+        return await resposta.json();
+    } catch (erro) {
+        console.error("Erro na requisição PUT:", erro);
+        throw erro;
+    }
+}
+
+/**
+ * DELETE
+ * Exclui um registro pelo ID.
+ */
+async function excluirRegistro(id) {
+    try {
+        const resposta = await fetch(`${API_URL}/${id}`, {
+            method: "DELETE"
+        });
+
+        if (!resposta.ok) {
+            throw new Error(
+                `Erro ao excluir registro: ${resposta.status}`
+            );
+        }
+
+        return true;
+    } catch (erro) {
+        console.error("Erro na requisição DELETE:", erro);
+        throw erro;
+    }
 }

@@ -107,214 +107,608 @@ document.addEventListener('DOMContentLoaded', () => {
 
 const hidratacao = {
 
-    // Meta diária de consumo de água (em ml)
+    // Meta diária de consumo de água em mililitros
     metaDiaria: 2000,
 
-    // Armazena todos os registros de consumo do dia
+    // Consumos de água registrados no dia atual
     consumos: [],
 
-    // Controla se o modal já foi exibido
+    // Registro diário encontrado na API
+    registroHoje: null,
+
+    // Controla se o modal de meta atingida já foi exibido
     modalExibido: false,
 
-    // Guarda referências aos elementos HTML
+    // Impede vários envios simultâneos
+    processando: false,
+
+    // Referências aos elementos da página
     elementos: {},
 
-    // Inicializa o módulo
-    iniciar() {
+    /**
+     * Inicializa o módulo de hidratação.
+     */
+    async iniciar() {
         this.carregarElementos();
-        this.carregarDados();
         this.registrarEventos();
+
+        await this.carregarDados();
+
         this.atualizarTela();
     },
 
-    // Busca os elementos da página
+    /**
+     * Busca os elementos do hidratacao.html.
+     */
     carregarElementos() {
-        this.elementos.consumo = document.getElementById("consumo");
-        this.elementos.barra = document.getElementById("barra-progresso");
-        this.elementos.porcentagem = document.getElementById("porcentagem");
-        this.elementos.statusMeta = document.getElementById("statusMeta");
-        this.elementos.faltam = document.getElementById("faltam");
+        this.elementos.consumo =
+            document.getElementById("consumo");
 
-        this.elementos.btn250 = document.getElementById("btn250");
-        this.elementos.btn500 = document.getElementById("btn500");
-        this.elementos.btnAdicionar = document.getElementById("btnAdicionar");
+        this.elementos.barra =
+            document.getElementById("barra-progresso");
 
-        this.elementos.input = document.getElementById("aguaPersonalizada");
+        this.elementos.porcentagem =
+            document.getElementById("porcentagem");
 
-        this.elementos.historico = document.getElementById("historico");
+        this.elementos.statusMeta =
+            document.getElementById("statusMeta");
 
-        this.elementos.modal = document.getElementById("modal");
-        this.elementos.fecharModal = document.getElementById("fecharModal");
+        this.elementos.faltam =
+            document.getElementById("faltam");
+
+        this.elementos.btn250 =
+            document.getElementById("btn250");
+
+        this.elementos.btn500 =
+            document.getElementById("btn500");
+
+        this.elementos.btnAdicionar =
+            document.getElementById("btnAdicionar");
+
+        this.elementos.input =
+            document.getElementById("aguaPersonalizada");
+
+        this.elementos.historico =
+            document.getElementById("historico");
+
+        this.elementos.modal =
+            document.getElementById("modal");
+
+        this.elementos.fecharModal =
+            document.getElementById("fecharModal");
     },
 
-    // Registra todos os eventos da interface
+    /**
+     * Registra os eventos dos botões.
+     */
     registrarEventos() {
-
         if (this.elementos.btn250) {
-            this.elementos.btn250.addEventListener("click", () => {
-                this.adicionarAgua(250);
-            });
+            this.elementos.btn250.addEventListener(
+                "click",
+                async () => {
+                    await this.adicionarAgua(250);
+                }
+            );
         }
 
         if (this.elementos.btn500) {
-            this.elementos.btn500.addEventListener("click", () => {
-                this.adicionarAgua(500);
-            });
+            this.elementos.btn500.addEventListener(
+                "click",
+                async () => {
+                    await this.adicionarAgua(500);
+                }
+            );
         }
 
         if (this.elementos.btnAdicionar) {
-            this.elementos.btnAdicionar.addEventListener("click", () => {
-                const quantidade = Number(this.elementos.input ? this.elementos.input.value : 0);
+            this.elementos.btnAdicionar.addEventListener(
+                "click",
+                async () => {
+                    const quantidade = Number(
+                        this.elementos.input
+                            ? this.elementos.input.value
+                            : 0
+                    );
 
-                if (quantidade > 0) {
-                    this.adicionarAgua(quantidade);
-                    if (this.elementos.input) this.elementos.input.value = "";
-                } else {
-                    alert("Digite uma quantidade válida.");
+                    if (
+                        !Number.isFinite(quantidade) ||
+                        quantidade <= 0
+                    ) {
+                        alert("Digite uma quantidade válida.");
+                        return;
+                    }
+
+                    await this.adicionarAgua(quantidade);
+
+                    if (this.elementos.input) {
+                        this.elementos.input.value = "";
+                    }
                 }
-            });
+            );
         }
 
         if (this.elementos.fecharModal) {
-            this.elementos.fecharModal.addEventListener("click", () => {
-                this.fecharModal();
-            });
+            this.elementos.fecharModal.addEventListener(
+                "click",
+                () => {
+                    this.fecharModal();
+                }
+            );
         }
     },
 
-    // Adiciona um novo consumo de água (com trava em 2000 ml)
-    adicionarAgua(quantidade) {
-        // Calcula o total que já foi consumido no dia
-        const totalAtual = this.consumos.reduce((total, c) => total + c.quantidade, 0);
+    /**
+     * GET
+     * Busca na API o registro correspondente ao dia atual.
+     */
+    async carregarDados() {
+        try {
+            const registros = await obterRegistros();
+            const hoje = this.obterDataAtual();
 
-        // Se já atingiu a meta, impede novos adições
-        if (totalAtual >= this.metaDiaria) {
-            alert("Você já atingiu a meta diária de 2000 ml!");
+            this.registroHoje =
+                registros.find((registro) => {
+                    return registro.data === hoje;
+                }) || null;
+
+            if (!this.registroHoje) {
+                this.consumos = [];
+                return;
+            }
+
+            /*
+             * Caso o registro já possua um histórico
+             * de consumos, carrega cada item.
+             */
+            if (Array.isArray(this.registroHoje.consumos)) {
+                this.consumos =
+                    this.registroHoje.consumos.map(
+                        (consumo) => {
+                            return {
+                                horario: consumo.horario,
+                                quantidade:
+                                    Number(consumo.quantidade) || 0
+                            };
+                        }
+                    );
+
+                return;
+            }
+
+            /*
+             * Compatibilidade com registros antigos que
+             * possuem somente aguaConsumidaMl.
+             */
+            const totalSalvo =
+                Number(
+                    this.registroHoje.aguaConsumidaMl
+                ) || 0;
+
+            if (totalSalvo > 0) {
+                this.consumos = [
+                    {
+                        horario: "Total salvo",
+                        quantidade: totalSalvo
+                    }
+                ];
+            } else {
+                this.consumos = [];
+            }
+
+        } catch (erro) {
+            console.error(
+                "Erro ao carregar a hidratação:",
+                erro
+            );
+
+            this.registroHoje = null;
+            this.consumos = [];
+
+            alert(
+                "Não foi possível carregar os dados. " +
+                "Verifique se o json-server está funcionando."
+            );
+        }
+    },
+
+    /**
+     * Adiciona água ao consumo do dia.
+     *
+     * Usa POST quando o registro ainda não existe.
+     * Usa PUT quando o registro já existe.
+     */
+    async adicionarAgua(quantidade) {
+        if (this.processando) {
             return;
         }
 
-        // Se a nova quantidade for ultrapassar a meta, ajusta para adicionar apenas o que falta
-        let quantidadeEfetiva = quantidade;
-        if (totalAtual + quantidade > this.metaDiaria) {
-            quantidadeEfetiva = this.metaDiaria - totalAtual;
-            alert(`Para não ultrapassar a meta, foram adicionados apenas ${quantidadeEfetiva} ml.`);
+        const totalAtual = this.calcularTotal();
+
+        if (totalAtual >= this.metaDiaria) {
+            alert(
+                "Você já atingiu a meta diária de 2000 ml!"
+            );
+
+            return;
         }
 
-        const agora = new Date();
+        let quantidadeEfetiva = quantidade;
 
-        this.consumos.push({
-            horario: agora.toLocaleTimeString("pt-BR", {
-                hour: "2-digit",
-                minute: "2-digit"
-            }),
+        if (
+            totalAtual + quantidade >
+            this.metaDiaria
+        ) {
+            quantidadeEfetiva =
+                this.metaDiaria - totalAtual;
+
+            alert(
+                "Para não ultrapassar a meta, " +
+                `foram adicionados apenas ${quantidadeEfetiva} ml.`
+            );
+        }
+
+        const novoConsumo = {
+            horario: new Date().toLocaleTimeString(
+                "pt-BR",
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            ),
+
             quantidade: quantidadeEfetiva
-        });
+        };
 
-        this.salvarDados();
-        this.atualizarTela();
+        const consumosAtualizados = [
+            ...this.consumos,
+            novoConsumo
+        ];
+
+        const novoTotal =
+            totalAtual + quantidadeEfetiva;
+
+        this.processando = true;
+        this.alterarEstadoBotoes(true);
+
+        try {
+            await this.salvarDados(
+                novoTotal,
+                consumosAtualizados
+            );
+
+            this.consumos =
+                consumosAtualizados;
+
+            this.atualizarTela();
+
+        } catch (erro) {
+            console.error(
+                "Erro ao registrar o consumo de água:",
+                erro
+            );
+
+            alert(
+                "Não foi possível salvar o consumo de água."
+            );
+
+        } finally {
+            this.processando = false;
+            this.alterarEstadoBotoes(false);
+        }
     },
 
-    // Atualiza todas as informações exibidas na página
+    /**
+     * POST ou PUT
+     * Salva o total e o histórico de consumo na API.
+     */
+    async salvarDados(
+        totalConsumido,
+        consumosAtualizados
+    ) {
+        const dadosDoDia = {
+            data: this.obterDataAtual(),
+
+            aguaConsumidaMl:
+                totalConsumido,
+
+            exercicioFeito:
+                this.registroHoje
+                    ? Boolean(
+                        this.registroHoje.exercicioFeito
+                    )
+                    : false,
+
+            notas:
+                this.registroHoje &&
+                this.registroHoje.notas
+                    ? this.registroHoje.notas
+                    : "Registro automático de hidratação",
+
+            consumos:
+                consumosAtualizados
+        };
+
+        /*
+         * Se já existe registro para hoje,
+         * realiza PUT.
+         */
+        if (this.registroHoje) {
+            const registroAtualizado = {
+                id: this.registroHoje.id,
+                ...dadosDoDia
+            };
+
+            this.registroHoje =
+                await atualizarRegistro(
+                    this.registroHoje.id,
+                    registroAtualizado
+                );
+
+            return;
+        }
+
+        /*
+         * Se ainda não existe registro para hoje,
+         * realiza POST.
+         */
+        this.registroHoje =
+            await adicionarRegistro(dadosDoDia);
+    },
+
+    /**
+     * DELETE
+     * Exclui da API o registro do dia atual.
+     */
+    async excluirDadosHoje() {
+        if (
+            !this.registroHoje ||
+            this.processando
+        ) {
+            return;
+        }
+
+        const confirmar = confirm(
+            "Deseja excluir o registro de hidratação de hoje?"
+        );
+
+        if (!confirmar) {
+            return;
+        }
+
+        this.processando = true;
+        this.alterarEstadoBotoes(true);
+
+        try {
+            await excluirRegistro(
+                this.registroHoje.id
+            );
+
+            this.registroHoje = null;
+            this.consumos = [];
+            this.modalExibido = false;
+
+            this.fecharModal();
+            this.atualizarTela();
+
+            alert(
+                "Registro de hidratação excluído com sucesso."
+            );
+
+        } catch (erro) {
+            console.error(
+                "Erro ao excluir o registro de hidratação:",
+                erro
+            );
+
+            alert(
+                "Não foi possível excluir o registro de hidratação."
+            );
+
+        } finally {
+            this.processando = false;
+            this.alterarEstadoBotoes(false);
+        }
+    },
+
+    /**
+     * Soma todos os consumos registrados no dia.
+     */
+    calcularTotal() {
+        return this.consumos.reduce(
+            (total, consumo) => {
+                return (
+                    total +
+                    (
+                        Number(consumo.quantidade) ||
+                        0
+                    )
+                );
+            },
+            0
+        );
+    },
+
+    /**
+     * Retorna a data local no formato AAAA-MM-DD.
+     */
+    obterDataAtual() {
+        const agora = new Date();
+
+        const ano =
+            agora.getFullYear();
+
+        const mes =
+            String(
+                agora.getMonth() + 1
+            ).padStart(2, "0");
+
+        const dia =
+            String(
+                agora.getDate()
+            ).padStart(2, "0");
+
+        return `${ano}-${mes}-${dia}`;
+    },
+
+    /**
+     * Ativa ou desativa os botões durante
+     * as requisições.
+     */
+    alterarEstadoBotoes(desativar) {
+        const botoes = [
+            this.elementos.btn250,
+            this.elementos.btn500,
+            this.elementos.btnAdicionar
+        ];
+
+        botoes.forEach((botao) => {
+            if (botao) {
+                botao.disabled = desativar;
+            }
+        });
+    },
+
+    /**
+     * Atualiza o total, a barra, a porcentagem
+     * e o status da meta.
+     */
     atualizarTela() {
-        const totalConsumido = this.consumos.reduce((total, consumo) => {
-            return total + consumo.quantidade;
-        }, 0);
+        const totalConsumido =
+            this.calcularTotal();
 
         if (this.elementos.consumo) {
-            this.elementos.consumo.textContent = `${totalConsumido} ml / ${this.metaDiaria} ml`;
+            this.elementos.consumo.textContent =
+                `${totalConsumido} ml / ${this.metaDiaria} ml`;
         }
 
         const percentual = Math.min(
-            (totalConsumido / this.metaDiaria) * 100,
+            (
+                totalConsumido /
+                this.metaDiaria
+            ) * 100,
             100
         );
 
-        if (this.elementos.barra) this.elementos.barra.style.width = percentual + "%";
-        if (this.elementos.porcentagem) {
-            this.elementos.porcentagem.textContent = `${Math.round(percentual)}%`;
+        if (this.elementos.barra) {
+            this.elementos.barra.style.width =
+                `${percentual}%`;
         }
 
-        if (totalConsumido >= this.metaDiaria) {
-            if (this.elementos.statusMeta) this.elementos.statusMeta.textContent = "✅ Meta atingida";
-            if (this.elementos.faltam) this.elementos.faltam.textContent = "Parabéns! Continue se hidratando.";
+        if (this.elementos.porcentagem) {
+            this.elementos.porcentagem.textContent =
+                `${Math.round(percentual)}%`;
+        }
+
+        if (
+            totalConsumido >=
+            this.metaDiaria
+        ) {
+            if (this.elementos.statusMeta) {
+                this.elementos.statusMeta.textContent =
+                    "✅ Meta atingida";
+            }
+
+            if (this.elementos.faltam) {
+                this.elementos.faltam.textContent =
+                    "Parabéns! Continue se hidratando.";
+            }
 
             if (!this.modalExibido) {
                 this.abrirModal();
                 this.modalExibido = true;
             }
+
         } else {
-            if (this.elementos.statusMeta) this.elementos.statusMeta.textContent = "❌ Ainda não";
-            if (this.elementos.faltam) this.elementos.faltam.textContent = `Faltam ${this.metaDiaria - totalConsumido} ml`;
+            if (this.elementos.statusMeta) {
+                this.elementos.statusMeta.textContent =
+                    "❌ Ainda não";
+            }
+
+            if (this.elementos.faltam) {
+                this.elementos.faltam.textContent =
+                    `Faltam ${
+                        this.metaDiaria -
+                        totalConsumido
+                    } ml`;
+            }
+
             this.modalExibido = false;
         }
 
         this.renderizarHistorico();
     },
 
-    // Exibe o histórico na tela
+    /**
+     * Exibe o histórico e cria o botão DELETE.
+     */
     renderizarHistorico() {
-        if (!this.elementos.historico) return;
+        if (!this.elementos.historico) {
+            return;
+        }
 
         this.elementos.historico.innerHTML = "";
 
         if (this.consumos.length === 0) {
-            this.elementos.historico.innerHTML = '<p class="vazio">Nenhum consumo registrado.</p>';
+            this.elementos.historico.innerHTML =
+                '<p class="vazio">' +
+                'Nenhum consumo registrado.' +
+                '</p>';
+
             return;
         }
 
         this.consumos.forEach((consumo) => {
-            const item = document.createElement("p");
-            item.textContent = `${consumo.horario} - +${consumo.quantidade} ml`;
-            this.elementos.historico.appendChild(item);
+            const item =
+                document.createElement("p");
+
+            item.textContent =
+                `${consumo.horario} - ` +
+                `+${consumo.quantidade} ml`;
+
+            this.elementos.historico.appendChild(
+                item
+            );
         });
+
+        const botaoExcluir =
+            document.createElement("button");
+
+        botaoExcluir.type = "button";
+
+        botaoExcluir.textContent =
+            "Excluir registro de hoje";
+
+        botaoExcluir.className =
+            "btn-primary";
+
+        botaoExcluir.addEventListener(
+            "click",
+            async () => {
+                await this.excluirDadosHoje();
+            }
+        );
+
+        this.elementos.historico.appendChild(
+            botaoExcluir
+        );
     },
 
     abrirModal() {
-        if (this.elementos.modal) this.elementos.modal.style.display = "flex";
+        if (this.elementos.modal) {
+            this.elementos.modal.style.display =
+                "flex";
+        }
     },
 
     fecharModal() {
-        if (this.elementos.modal) this.elementos.modal.style.display = "none";
-    },
-
-    salvarDados() {
-        localStorage.setItem(
-            "consumosHabitFlow",
-            JSON.stringify(this.consumos)
-        );
-        const totalConsumido = this.consumos.reduce((total, c) => total + c.quantidade, 0);
-        const hojeIso = new Date().toISOString().split('T')[0];
-        let registrosGerais = [];
-        const salvos = localStorage.getItem('habitflow_dados');
-        if (salvos) {
-            registrosGerais = JSON.parse(salvos);
-        } else if (typeof dadosIniciais !== 'undefined') {
-            registrosGerais = [...dadosIniciais];
-        }
-        const indexHoje = registrosGerais.findIndex(r => r.data === hojeIso);
-        if (indexHoje !== -1) {
-            registrosGerais[indexHoje].aguaConsumidaMl = totalConsumido;
-        } else {
-            registrosGerais.push({
-                id: Date.now(),
-                data: hojeIso,
-                aguaConsumidaMl: totalConsumido,
-                exercicioFeito: false,
-                notas: 'Registro automático de água'
-            });
-        }
-        localStorage.setItem('habitflow_dados', JSON.stringify(registrosGerais));
-    },
-
-    carregarDados() {
-        const dados = localStorage.getItem("consumosHabitFlow");
-        if (dados) {
-            this.consumos = JSON.parse(dados);
+        if (this.elementos.modal) {
+            this.elementos.modal.style.display =
+                "none";
         }
     }
 };
 
-// Só inicia a hidratação se estiver na página que tem o elemento "consumo"
+// Inicia somente na página de hidratação
 if (document.getElementById("consumo")) {
     hidratacao.iniciar();
 }
