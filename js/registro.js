@@ -1,3 +1,11 @@
+// ==========================================
+// MÓDULO DE REGISTROS
+// Miniprojeto 2 - Etapa 1
+// Responsável: editar (PUT) e remover (DELETE) via API
+// ==========================================
+
+const API_URL = 'http://localhost:3000/habitos';
+
 let registros = [];
 let feedbackTimeout = null;
 
@@ -14,22 +22,18 @@ const editarDataEl      = document.getElementById('editar-data');
 const editarAguaEl      = document.getElementById('editar-agua');
 const editarExercicioEl = document.getElementById('editar-exercicio');
 const editarNotasEl     = document.getElementById('editar-notas');
-function obterRegistros() {
-  if (typeof obterRegistros !== 'undefined' && typeof salvarRegistros === 'function') {
-    return JSON.parse(localStorage.getItem('diario_habitos_dados')) || dadosIniciais;
+
+/**
+ * Traduz o erro para uma mensagem que o usuário entenda.
+ * O fetch lança TypeError quando não consegue nem conectar no servidor.
+ */
+function mensagemDeErro(erro) {
+  if (erro instanceof TypeError) {
+    return 'Não foi possível conectar à API. Verifique se o json-server está rodando (npm run json-server).';
   }
-  const salvos = localStorage.getItem('diario_habitos_dados');
-  if (salvos) return JSON.parse(salvos);
-  return (typeof dadosIniciais !== 'undefined') ? [...dadosIniciais] : [];
+  return erro.message;
 }
 
-function persistir() {
-  if (typeof salvarRegistros === 'function') {
-    salvarRegistros(registros);
-  } else {
-    localStorage.setItem('diario_habitos_dados', JSON.stringify(registros));
-  }
-}
 function mostrarFeedback(texto, tipo) {
   feedbackEl.textContent = texto;
   feedbackEl.className = 'feedback-msg ' + tipo;
@@ -39,6 +43,18 @@ function mostrarFeedback(texto, tipo) {
   feedbackTimeout = setTimeout(function () {
     feedbackEl.classList.add('hidden');
   }, 3000);
+}
+
+/**
+ * Mostra uma mensagem no lugar da lista (carregando ou erro).
+ */
+function mostrarMensagemNaLista(texto) {
+  listaEl.innerHTML = '';
+  const p = document.createElement('p');
+  p.className = 'vazio-msg';
+  p.textContent = texto;
+  listaEl.appendChild(p);
+  contadorEl.textContent = '';
 }
 
 function aplicarFiltros(lista) {
@@ -125,7 +141,7 @@ function criarCard(reg) {
   btnRemover.className = 'btn-acao btn-remover';
   btnRemover.textContent = 'Remover';
   btnRemover.addEventListener('click', function () {
-    removerRegistro(reg.id);
+    removerRegistro(reg.id, btnRemover);
   });
 
   acoes.appendChild(btnEditar);
@@ -164,22 +180,51 @@ function renderizar() {
   });
 }
 
-function removerRegistro(id) {
+// ==========================================
+// DELETE - remove o registro na API
+// ==========================================
+async function removerRegistro(id, botao) {
   const confirmar = window.confirm('Tem certeza que deseja remover este registro?');
   if (!confirmar) return;
 
-  registros = registros.filter(function (reg) {
-    return reg.id !== id;
-  });
+  // Estado de carregamento: trava o botão durante a requisição
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = 'Removendo...';
+  }
 
-  persistir();
-  renderizar();
-  mostrarFeedback('Registro removido com sucesso.', 'sucesso');
+  try {
+    const resposta = await fetch(API_URL + '/' + id, {
+      method: 'DELETE'
+    });
+
+    if (!resposta.ok) {
+      throw new Error('Falha ao remover o registro (HTTP ' + resposta.status + ')');
+    }
+
+    // Só tira da lista da tela depois que a API confirmou a exclusão.
+    // Comparação com String: o json-server usa ids em texto.
+    registros = registros.filter(function (reg) {
+      return String(reg.id) !== String(id);
+    });
+
+    renderizar();
+    mostrarFeedback('Registro removido com sucesso.', 'sucesso');
+  } catch (erro) {
+    console.error('Erro no DELETE:', erro);
+    mostrarFeedback(mensagemDeErro(erro), 'erro');
+
+    // Devolve o botão ao normal para o usuário poder tentar de novo
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = 'Remover';
+    }
+  }
 }
 
 function abrirModalEdicao(id) {
   const reg = registros.find(function (r) {
-    return r.id === id;
+    return String(r.id) === String(id);
   });
   if (!reg) return;
 
@@ -196,10 +241,15 @@ function fecharModal() {
   modalEl.classList.add('hidden');
 }
 
-function salvarEdicao(evento) {
+// ==========================================
+// PUT - envia o registro editado para a API
+// ==========================================
+async function salvarEdicao(evento) {
   evento.preventDefault();
 
-  const id   = Number(editarIdEl.value);
+  // O id vem como texto do input hidden. NÃO converter para Number:
+  // o json-server gera ids em string (ex: "a1b2c3").
+  const id   = editarIdEl.value;
   const data = editarDataEl.value;
   const agua = Number(editarAguaEl.value);
 
@@ -215,23 +265,52 @@ function salvarEdicao(evento) {
     mostrarFeedback('Valor de água inválido. Máximo permitido: 10.000ml.', 'erro');
     return;
   }
-  registros = registros.map(function (reg) {
-    if (reg.id === id) {
-      return {
-        ...reg,
-        data: data,
-        aguaConsumidaMl: agua,
-        exercicioFeito: editarExercicioEl.checked,
-        notas: editarNotasEl.value.trim()
-      };
-    }
-    return reg;
-  });
 
-  persistir();
-  renderizar();
-  fecharModal();
-  mostrarFeedback('Registro atualizado com sucesso.', 'sucesso');
+  const botaoSalvar = formEditarEl.querySelector('button[type="submit"]');
+  const textoOriginal = botaoSalvar ? botaoSalvar.textContent : 'Salvar';
+  if (botaoSalvar) {
+    botaoSalvar.disabled = true;
+    botaoSalvar.textContent = 'Salvando...';
+  }
+
+  const registroAtualizado = {
+    id: id,
+    data: data,
+    aguaConsumidaMl: agua,
+    exercicioFeito: editarExercicioEl.checked,
+    notas: editarNotasEl.value.trim()
+  };
+
+  try {
+    const resposta = await fetch(API_URL + '/' + id, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(registroAtualizado)
+    });
+
+    if (!resposta.ok) {
+      throw new Error('Falha ao atualizar o registro (HTTP ' + resposta.status + ')');
+    }
+
+    const salvo = await resposta.json();
+
+    // Atualiza a lista da tela com o que a API devolveu
+    registros = registros.map(function (reg) {
+      return String(reg.id) === String(id) ? salvo : reg;
+    });
+
+    renderizar();
+    fecharModal();
+    mostrarFeedback('Registro atualizado com sucesso.', 'sucesso');
+  } catch (erro) {
+    console.error('Erro no PUT:', erro);
+    mostrarFeedback(mensagemDeErro(erro), 'erro');
+  } finally {
+    if (botaoSalvar) {
+      botaoSalvar.disabled = false;
+      botaoSalvar.textContent = textoOriginal;
+    }
+  }
 }
 
 buscaEl.addEventListener('input', renderizar);
@@ -243,9 +322,28 @@ modalEl.addEventListener('click', function (e) {
   if (e.target === modalEl) fecharModal();
 });
 
-function iniciar() {
-  registros = obterRegistros();
-  renderizar();
+// ==========================================
+// GET - carrega a lista da API ao abrir a página
+// (necessário para editar/remover: os ids têm que ser
+//  os mesmos que existem no servidor)
+// ==========================================
+async function iniciar() {
+  mostrarMensagemNaLista('Carregando registros...');
+
+  try {
+    const resposta = await fetch(API_URL);
+
+    if (!resposta.ok) {
+      throw new Error('Falha ao buscar os registros (HTTP ' + resposta.status + ')');
+    }
+
+    registros = await resposta.json();
+    renderizar();
+  } catch (erro) {
+    console.error('Erro no GET:', erro);
+    registros = [];
+    mostrarMensagemNaLista(mensagemDeErro(erro));
+  }
 }
 
 iniciar();
